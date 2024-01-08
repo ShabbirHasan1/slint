@@ -85,16 +85,16 @@ export component StateLayer inherits TouchArea {
 }
 
 export component MenuBorder inherits Rectangle {
-    border-radius: 7px;
+    border-radius: 8px;
     background: CosmicPalette.alternate-background;
     drop-shadow-blur: 16px;
-    drop-shadow-offset-y: 8px;
+    drop-shadow-offset-y: 4px;
     drop-shadow-color: CosmicPalette.shadow;
 
     Rectangle {
         border-width: 1px;
         border-radius: parent.border-radius;
-        border-color: CosmicPalette.control-background-stroke-flyout;
+        border-color: CosmicPalette.control-divider;
     }
 }
 
@@ -108,65 +108,50 @@ export component ListItem {
     in property <length> pressed-x;
     in property <length> pressed-y;
 
-    min-width: i-layout.min-width;
-    min-height: max(40px, i-layout.min-height);
+    min-width: layout.min-width;
+    min-height: max(32px, layout.min-height);
     vertical-stretch: 0;
     horizontal-stretch: 1;
 
     states [
-        pressed when root.pressed : {
-            i-background.background: is-selected ? CosmicPalette.subtle-secondary : CosmicPalette.subtle-tertiary;
-        }
-        hover when root.has-hover : {
-            i-text.color: CosmicPalette.text-secondary;
-            i-background.background: is-selected ? CosmicPalette.subtle-tertiary : CosmicPalette.subtle-secondary;
-            i-selector.height: root.is-selected ? 16px : 0;
-        }
         is-selected when root.is-selected : {
-            i-background.background: CosmicPalette.subtle-secondary;
-            i-selector.height: 16px;
+           text.color: CosmicPalette.accent-text;
         }
     ]
 
-    if (root.has-focus) : FocusBorder {
-        border-radius: 4px;
+    StateLayerBase {
+        width: 100%;
+        height: 100%;
+        pressed: root.pressed;
+        has-hover: root.has-hover;
+        has-focus: root.has-focus;
+        checked: root.is-selected;
+        border-radius: 16px;
     }
 
-    i-background := Rectangle {
-        width: root.width - 6px;
-        height: root.height - 4px;
-        background: transparent;
-        border-radius: 4px;
+    layout := HorizontalLayout {
+        padding-left: 8px;
+        padding-right: 8px;
+        spacing: 8px;
 
-        animate background { duration: 150ms; }
-
-        i-layout := HorizontalLayout {
-            padding-left: 16px;
-            padding-right: 16px;
-            spacing: 4px;
-
-            i-text := Text {
-                text: root.item.text;
-                color: CosmicPalette.control-foreground;
-                font-size: CosmicFontSettings.body.font-size;
-                font-weight: CosmicFontSettings.body.font-weight;
-                vertical-alignment: center;
-                horizontal-alignment: left;
-                overflow: elide;
-
-                animate color { duration: 200ms; }
-            }
+        text := Text {
+            text: root.item.text;
+            color: CosmicPalette.control-foreground;
+            font-size: CosmicFontSettings.body.font-size;
+            font-weight: CosmicFontSettings.body.font-weight;
+            vertical-alignment: center;
+            horizontal-alignment: left;
+            overflow: elide;
         }
 
-        i-selector := Rectangle {
-            x: 0px;
-            y: (parent.height - self.height) / 2;
-            width: 3px;
-            height: 0px;
-            background: CosmicPalette.accent-background;
-            border-radius: 2px;
-
-            animate height { duration: 150ms; easing: ease-out; }
+        Path {
+            width: 16px;
+            height: 16px;
+            y: (root.height - self.height) / 2;
+            visible: root.is-selected;
+            stroke: text.color;
+            stroke-width: 2px;
+            commands: "M 3 8 L 6 12 L 13 5";
         }
     }
 

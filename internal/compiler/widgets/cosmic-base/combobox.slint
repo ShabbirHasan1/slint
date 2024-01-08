@@ -76,14 +76,12 @@ export component ComboBox {
 
     popup := PopupWindow {
         x: 0;
-        // Position the popup so that the first element is over the popup.
-        // Ideally it should be so that the current element is over the popup.
-        y: -4px;
+        y: root.height + 4px;
         width: root.width;
 
         MenuBorder {
             VerticalLayout {
-                padding: 4px;
+                padding: 8px;
 
                 for value[index] in root.model : ListItem {
                     item: { text: value };
