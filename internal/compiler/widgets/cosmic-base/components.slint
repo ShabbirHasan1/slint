@@ -18,27 +18,12 @@ export component FocusBorder inherits Rectangle {
     }
 }
 
-export component StateLayer inherits TouchArea {
+export component StateLayerBase {
     in property <length> border-radius <=> overlay.border-radius;
-    out property <bool> has-focus: focus-scope.has-focus;
-    in-out property <bool> checked;
-
-    forward-focus: focus-scope;
-
-    focus-scope := FocusScope {
-        x: 0;
-        width: 0; // Do not react on clicks
-        enabled <=> root.enabled;
-
-        key-pressed(event) => {
-            if (event.text == " " || event.text == "\n") {
-                root.clicked();
-                 return accept;
-            }
-
-            return reject;
-        }
-    }
+    in property <bool> has-focus;
+    in property <bool> pressed;
+    in property <bool> has-hover;
+    in property <bool> checked;
 
     @children
 
@@ -63,6 +48,40 @@ export component StateLayer inherits TouchArea {
             overlay.background: CosmicPalette.state-selected;
         }
     ]
+}
+
+export component StateLayer inherits TouchArea {
+    in property <length> border-radius <=> base.border-radius;
+    out property <bool> has-focus: focus-scope.has-focus;
+    in-out property <bool> checked;
+
+    forward-focus: focus-scope;
+
+    focus-scope := FocusScope {
+        x: 0;
+        width: 0; // Do not react on clicks
+        enabled <=> root.enabled;
+
+        key-pressed(event) => {
+            if (event.text == " " || event.text == "\n") {
+                root.clicked();
+                 return accept;
+            }
+
+            return reject;
+        }
+    }
+
+   base := StateLayerBase {
+        width: 100%;
+        height: 100%;
+        has-focus: root.has-focus;
+        pressed: root.pressed;
+        has-hover: root.has-hover;
+        checked: root.checked;
+
+        @children
+   }
 }
 
 export component MenuBorder inherits Rectangle {
