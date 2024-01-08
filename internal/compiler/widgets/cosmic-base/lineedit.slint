@@ -1,7 +1,7 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-1.1 OR LicenseRef-Slint-commercial
 
-import { FluentFontSettings, FluentPalette } from "styling.slint";
+import { CosmicFontSettings, CosmicPalette } from "styling.slint";
 import { LineEditBase} from "../common/lineedit-base.slint";
 
 export component LineEdit {
@@ -16,7 +16,7 @@ export component LineEdit {
 
     callback accepted <=> i-base.accepted;
     callback edited <=> i-base.edited;
-    
+
     public function set-selection-offsets(start: int, end: int) {
         i-base.set-selection-offsets(start, end);
     }
@@ -49,37 +49,37 @@ export component LineEdit {
 
     states [
         disabled when !root.enabled : {
-            i-background.background: FluentPalette.control-disabled;
-            i-background.border-color: FluentPalette.border;
-            i-base.text-color: FluentPalette.text-disabled;
-            i-base.selection-foreground-color: FluentPalette.text-accent-foreground-disabled;
-            i-base.placeholder-color: FluentPalette.text-disabled;
+            i-background.background: CosmicPalette.control-disabled;
+            i-background.border-color: CosmicPalette.border;
+            i-base.text-color: CosmicPalette.text-disabled;
+            i-base.selection-foreground-color: CosmicPalette.text-accent-foreground-disabled;
+            i-base.placeholder-color: CosmicPalette.text-disabled;
         }
         focused when root.has-focus : {
-            i-background.background: FluentPalette.control-input-active;
-            i-background.border-color: FluentPalette.border;
-            i-focus-border.background: FluentPalette.accent-background;
-            i-base.placeholder-color: FluentPalette.text-tertiary;
+            i-background.background: CosmicPalette.control-input-active;
+            i-background.border-color: CosmicPalette.border;
+            i-focus-border.background: CosmicPalette.accent-background;
+            i-base.placeholder-color: CosmicPalette.text-tertiary;
         }
     ]
 
     i-background := Rectangle {
         border-radius: 4px;
-        background: FluentPalette.control-background;
+        background: CosmicPalette.control-background;
         border-width: 1px;
-        border-color: FluentPalette.text-control-border;
+        border-color: CosmicPalette.text-control-border;
 
         i-layout := HorizontalLayout {
             padding-left: 12px;
             padding-right: 12px;
 
             i-base := LineEditBase {
-                font-size: FluentFontSettings.body.font-size;
-                font-weight: FluentFontSettings.body.font-weight;
-                selection-background-color: FluentPalette.selection-background;
-                selection-foreground-color: FluentPalette.accent-foreground;
-                text-color: FluentPalette.foreground;
-                placeholder-color: FluentPalette.text-secondary;
+                font-size: CosmicFontSettings.body.font-size;
+                font-weight: CosmicFontSettings.body.font-weight;
+                selection-background-color: CosmicPalette.selection-background;
+                selection-foreground-color: CosmicPalette.accent-foreground;
+                text-color: CosmicPalette.foreground;
+                placeholder-color: CosmicPalette.text-secondary;
                 margin: i-layout.padding-left + i-layout.padding-right;
             }
         }

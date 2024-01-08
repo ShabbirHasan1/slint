@@ -1,7 +1,7 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-1.1 OR LicenseRef-Slint-commercial
 
-import { FluentPalette, FluentFontSettings, Icons } from "styling.slint";
+import { CosmicPalette, CosmicFontSettings, Icons } from "styling.slint";
 import { SpinBoxBase } from "../common/spinbox-base.slint";
 
 component SpinBoxButton {
@@ -14,7 +14,7 @@ component SpinBoxButton {
 
     states [
         pressed when i-touch-area.pressed : {
-            i-background.background: FluentPalette.subtle;
+            i-background.background: CosmicPalette.subtle;
         }
     ]
 
@@ -23,7 +23,7 @@ component SpinBoxButton {
 
         i-icon := Image {
             image-fit: contain;
-            colorize: FluentPalette.text-secondary;
+            colorize: CosmicPalette.text-secondary;
             width: 12px;
 
             animate colorize { duration: 150ms; }
@@ -54,23 +54,23 @@ export component SpinBox {
 
     states [
         disabled when !root.enabled : {
-            i-background.background: FluentPalette.control-disabled;
-            i-background.border-color: FluentPalette.border;
-            i-base.color: FluentPalette.text-disabled;
-            i-base.selection-foreground-color: FluentPalette.text-accent-foreground-disabled;
+            i-background.background: CosmicPalette.control-disabled;
+            i-background.border-color: CosmicPalette.border;
+            i-base.color: CosmicPalette.text-disabled;
+            i-base.selection-foreground-color: CosmicPalette.text-accent-foreground-disabled;
         }
         focused when root.has-focus : {
-            i-background.background: FluentPalette.control-input-active;
-            i-background.border-color: FluentPalette.border;
-            i-focus-border.background: FluentPalette.accent-background;
+            i-background.background: CosmicPalette.control-input-active;
+            i-background.border-color: CosmicPalette.border;
+            i-focus-border.background: CosmicPalette.accent-background;
         }
     ]
 
     i-background := Rectangle {
         border-radius: 4px;
-        background: FluentPalette.control-background;
+        background: CosmicPalette.control-background;
         border-width: 1px;
-        border-color: FluentPalette.text-control-border;
+        border-color: CosmicPalette.text-control-border;
 
         i-layout := HorizontalLayout {
             padding-left: 12px;
@@ -85,11 +85,11 @@ export component SpinBox {
 
                 i-base := SpinBoxBase {
                     width: 100%;
-                    color: FluentPalette.control-foreground;
-                    font-size: FluentFontSettings.body.font-size;
-                    font-weight: FluentFontSettings.body.font-weight;
-                    selection-background-color: FluentPalette.selection-background;
-                    selection-foreground-color: FluentPalette.accent-foreground;
+                    color: CosmicPalette.control-foreground;
+                    font-size: CosmicFontSettings.body.font-size;
+                    font-weight: CosmicFontSettings.body.font-weight;
+                    selection-background-color: CosmicPalette.selection-background;
+                    selection-foreground-color: CosmicPalette.accent-foreground;
                 }
             }
 

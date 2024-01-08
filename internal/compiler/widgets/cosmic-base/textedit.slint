@@ -1,7 +1,7 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-1.1 OR LicenseRef-Slint-commercial
 
-import { FluentFontSettings, FluentPalette } from "styling.slint";
+import { CosmicFontSettings, CosmicPalette } from "styling.slint";
 import { ScrollView } from "scrollview.slint";
 
 export component TextEdit {
@@ -51,15 +51,15 @@ export component TextEdit {
 
     states [
         disabled when !root.enabled : {
-            i-background.background: FluentPalette.control-disabled;
-            i-background.border-color: FluentPalette.border;
-            i-text-input.color: FluentPalette.text-disabled;
-            i-text-input.selection-foreground-color: FluentPalette.text-accent-foreground-disabled;
+            i-background.background: CosmicPalette.control-disabled;
+            i-background.border-color: CosmicPalette.border;
+            i-text-input.color: CosmicPalette.text-disabled;
+            i-text-input.selection-foreground-color: CosmicPalette.text-accent-foreground-disabled;
         }
         focused when root.has-focus : {
-            i-background.background: FluentPalette.control-input-active;
-            i-background.border-color: FluentPalette.border;
-            i-focus-border.background: FluentPalette.accent-background;
+            i-background.background: CosmicPalette.control-input-active;
+            i-background.border-color: CosmicPalette.border;
+            i-focus-border.background: CosmicPalette.accent-background;
         }
     ]
 
@@ -67,9 +67,9 @@ export component TextEdit {
         width: 100%;
         height: 100%;
         border-radius: 4px;
-        background: FluentPalette.control-background;
+        background: CosmicPalette.control-background;
         border-width: 1px;
-        border-color: FluentPalette.text-control-border;
+        border-color: CosmicPalette.text-control-border;
 
         i-scroll-view := ScrollView {
             x: 12px;
@@ -81,11 +81,11 @@ export component TextEdit {
 
             i-text-input := TextInput {
                 enabled: true;
-                color: FluentPalette.foreground;
-                font-size: FluentFontSettings.body.font-size;
-                font-weight: FluentFontSettings.body.font-weight;
-                selection-background-color: FluentPalette.selection-background;
-                selection-foreground-color: FluentPalette.accent-foreground;
+                color: CosmicPalette.foreground;
+                font-size: CosmicFontSettings.body.font-size;
+                font-weight: CosmicFontSettings.body.font-weight;
+                selection-background-color: CosmicPalette.selection-background;
+                selection-foreground-color: CosmicPalette.accent-foreground;
                 single-line: false;
                 wrap: word-wrap;
 

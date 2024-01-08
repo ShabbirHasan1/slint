@@ -1,7 +1,7 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-1.1 OR LicenseRef-Slint-commercial
 
-import { FluentPalette, FluentFontSettings, Icons } from "styling.slint";
+import { CosmicPalette, CosmicFontSettings, Icons } from "styling.slint";
 import { ListView } from "../common/listview.slint";
 
 component TableViewColumn inherits Rectangle {
@@ -10,14 +10,14 @@ component TableViewColumn inherits Rectangle {
     callback clicked <=> i-touch-area.clicked;
     callback adjust_size(length);
 
-    background: FluentPalette.background;
+    background: CosmicPalette.background;
 
     states [
         pressed when i-touch-area.pressed : {
-            background: FluentPalette.control-secondary;
+            background: CosmicPalette.control-secondary;
         }
         hover when i-touch-area.has-hover : {
-            background: FluentPalette.sub-title-tertiary;
+            background: CosmicPalette.sub-title-tertiary;
         }
     ]
 
@@ -36,7 +36,7 @@ component TableViewColumn inherits Rectangle {
 
         i-icon := Image {
             image-fit: contain;
-            colorize: FluentPalette.text-secondary;
+            colorize: CosmicPalette.text-secondary;
             visible: root.sort-order != SortOrder.unsorted;
             width: 12px;
             y: (parent.height - self.height) / 2;
@@ -51,7 +51,7 @@ component TableViewColumn inherits Rectangle {
         y: parent.height - self.height;
         width: 100%;
         height: 1px;
-        background: FluentPalette.divider;
+        background: CosmicPalette.divider;
     }
 
     Rectangle {
@@ -60,7 +60,7 @@ component TableViewColumn inherits Rectangle {
 
         states [
             hover when i-movable-touch-area.has-hover : {
-                background: FluentPalette.control-secondary;
+                background: CosmicPalette.control-secondary;
             }
         ]
 
@@ -102,18 +102,18 @@ component TableViewRow inherits Rectangle {
     min-width: i-layout.min-width;
     min-height: max(34px, i-layout.min-height);
     border-radius: 4px;
-    background: root.even ? FluentPalette.control-background : transparent;
+    background: root.even ? CosmicPalette.control-background : transparent;
 
     states [
         pressed when i-touch-area.pressed : {
-            root.background: selected ? FluentPalette.subtle-secondary : FluentPalette.subtle-tertiary;
+            root.background: selected ? CosmicPalette.subtle-secondary : CosmicPalette.subtle-tertiary;
         }
         hover when i-touch-area.has-hover : {
-            root.background: selected ? FluentPalette.subtle-tertiary : FluentPalette.subtle-secondary;
+            root.background: selected ? CosmicPalette.subtle-tertiary : CosmicPalette.subtle-secondary;
             i-selector.height: root.selected ? 16px : 0;
         }
         selected when root.selected : {
-            root.background: FluentPalette.subtle-secondary;
+            root.background: CosmicPalette.subtle-secondary;
             i-selector.height: 16px;
         }
     ]
@@ -136,7 +136,7 @@ component TableViewRow inherits Rectangle {
         y: (parent.height - self.height) / 2;
         width: 3px;
         height: 0px;
-        background: FluentPalette.accent-background;
+        background: CosmicPalette.accent-background;
         border-radius: 2px;
 
         animate height { duration: 150ms; easing: ease-out; }
@@ -227,9 +227,9 @@ export component StandardTableView {
                     Text {
                         vertical-alignment: center;
                         text: column.title;
-                        font-weight: FluentFontSettings.body.font-weight;
-                        font-size: FluentFontSettings.body.font-size;
-                        color: FluentPalette.text-secondary;
+                        font-weight: CosmicFontSettings.body.font-weight;
+                        font-size: CosmicFontSettings.body.font-size;
+                        color: CosmicPalette.text-secondary;
                         overflow: elide;
                     }
                 }
@@ -268,9 +268,9 @@ export component StandardTableView {
                             overflow: elide;
                             vertical-alignment: center;
                             text: cell.text;
-                            font-weight: FluentFontSettings.body.font-weight;
-                            font-size: FluentFontSettings.body.font-size;
-                            color: mod(idx, 2) == 0 ? FluentPalette.control-foreground : FluentPalette.text-secondary;
+                            font-weight: CosmicFontSettings.body.font-weight;
+                            font-size: CosmicFontSettings.body.font-size;
+                            color: mod(idx, 2) == 0 ? CosmicPalette.control-foreground : CosmicPalette.text-secondary;
                         }
                     }
                 }
