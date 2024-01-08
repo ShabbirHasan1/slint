@@ -18,6 +18,27 @@ export component FocusBorder inherits Rectangle {
     }
 }
 
+export component StateLayer inherits TouchArea {
+    in property <length> border-radius <=> overlay.border-radius;
+    in-out property <bool> checked;
+
+    @children
+
+    overlay := Rectangle {}
+
+    states [
+        pressed when root.pressed : {
+            overlay.background: CosmicPalette.state-pressed;
+        }
+        hover when root.has-hover : {
+            overlay.background: CosmicPalette.state-hover;
+        }
+        checked when root.checked : {
+            overlay.background: CosmicPalette.state-selected;
+        }
+    ]
+}
+
 export component MenuBorder inherits Rectangle {
     border-radius: 7px;
     background: CosmicPalette.alternate-background;

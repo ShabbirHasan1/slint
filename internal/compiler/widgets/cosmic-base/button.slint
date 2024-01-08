@@ -2,56 +2,44 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-1.1 OR LicenseRef-Slint-commercial
 
 import { CosmicFontSettings, CosmicPalette } from "styling.slint";
-import { FocusBorder } from "components.slint";
+import { StateLayer, FocusBorder } from "components.slint";
 
 export component Button {
     in property <string> text;
     in property <image> icon;
     in property <bool> primary;
-    in property <bool> enabled <=> i-touch-area.enabled;
+    in property <bool> enabled <=> state-layer.enabled;
     in property <bool> checkable;
     in property <bool> colorize-icon;
-    out property <bool> has-focus: i-focus-scope.has-focus;
-    out property <bool> pressed: self.enabled && i-touch-area.pressed;
-    in-out property <bool> checked;
+    out property <bool> has-focus: focus-scope.has-focus;
+    out property <bool> pressed: self.enabled && state-layer.pressed;
+    in-out property <bool> checked <=> state-layer.checked;
 
     callback clicked;
 
-    private property <brush> text-color: primary || checked ? CosmicPalette.accent-foreground : CosmicPalette.control-foreground;
+    private property <brush> text-color: primary ? CosmicPalette.accent-foreground : CosmicPalette.control-foreground;
 
-    min-width: max(32px, i-layout.min-width);
-    min-height: max(32px, i-layout.min-height);
+    min-width: max(32px, layout.min-width);
+    min-height: max(32px, layout.min-height);
     horizontal-stretch: 0;
     vertical-stretch: 0;
     accessible-label: text;
     accessible-role: button;
-    forward-focus: i-focus-scope;
+    forward-focus: focus-scope;
 
     states [
         disabled when !root.enabled : {
-            i-background.background: root.primary || root.checked ? CosmicPalette.accent-disabled : CosmicPalette.control-disabled;
-            root.text-color: root.primary || root.checked ? CosmicPalette.text-accent-foreground-disabled : CosmicPalette.text-disabled;
-        }
-        pressed when root.pressed : {
-            i-background.background: root.primary || root.checked ? CosmicPalette.tertiary-accent-background : CosmicPalette.control-tertiary;
-            root.text-color: root.primary || root.checked ? CosmicPalette.text-accent-foreground-secondary : CosmicPalette.text-secondary;
-        }
-        hover when i-touch-area.has-hover : {
-            i-background.background: root.primary || root.checked ? CosmicPalette.secondary-accent-background : CosmicPalette.control-secondary;
-        }
-        checked when root.checked : {
-            i-background.background: CosmicPalette.accent-background;
-            root.text-color: CosmicPalette.accent-foreground;
+            root.opacity: 0.5;
         }
     ]
 
-    i-background := Rectangle {
+    background := Rectangle {
         border-radius: 16px;
         background: root.primary ? CosmicPalette.accent-background : CosmicPalette.control-background;
 
         animate background, border-color { duration: 150ms; }
 
-        i-layout := HorizontalLayout {
+        layout := HorizontalLayout {
             padding-left: 12px;
             padding-right: 12px;
             padding-top: 5px;
@@ -79,7 +67,9 @@ export component Button {
         }
     }
 
-    i-touch-area := TouchArea {
+    state-layer := StateLayer {
+        border-radius: background.border-radius;
+
         clicked => {
             if (root.checkable) {
                 root.checked = !root.checked;
@@ -88,14 +78,14 @@ export component Button {
         }
     }
 
-    i-focus-scope := FocusScope {
+    focus-scope := FocusScope {
         x: 0;
         width: 0; // Do not react on clicks
         enabled <=> root.enabled;
 
         key-pressed(event) => {
             if (event.text == " " || event.text == "\n") {
-                i-touch-area.clicked();
+                state-layer.clicked();
                  return accept;
             }
 
@@ -105,6 +95,6 @@ export component Button {
 
     // focus border
     if (root.has-focus && root.enabled) : FocusBorder {
-        border-radius: i-background.border-radius;
+        border-radius: background.border-radius;
     }
 }
