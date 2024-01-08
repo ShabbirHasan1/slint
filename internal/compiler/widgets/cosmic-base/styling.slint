@@ -13,11 +13,11 @@ export global CosmicFontSettings {
     out property <int> regular-font-weight: 400;
     out property <int> semibold-font-weight: 600;
     out property <TextStyle> body: {
-        font-size: 14 * 0.0769rem,
+        font-size: 15 * 0.0769rem,
         font-weight: regular-font-weight
     };
     out property <TextStyle> body-strong: {
-        font-size: 14 * 0.0769rem,
+        font-size: 15 * 0.0769rem,
         font-weight: semibold-font-weight
     };
 }
@@ -37,6 +37,10 @@ export global CosmicPalette {
     out property <brush> selection-background: dark-color-scheme ? #63D0DF : #00525A;
     out property <brush> selection-foreground: dark-color-scheme ? #161616 : #FFFFFF;
     out property <brush> border: dark-color-scheme ? #C4C4C433 : #29292933;
+
+    // additional palette
+    out property <brush> state-hover: dark-color-scheme ? #2E2E2E80 : #9E9E9E80;
+    out property <brush> state-pressed: dark-color-scheme ? #16161680 : #BEBEBE80;
 
     // additional palette
     out property <brush> secondary-accent-background: dark-color-scheme ? #60CDFFE6 : #005FB8E6;
