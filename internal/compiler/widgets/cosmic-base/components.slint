@@ -20,11 +20,37 @@ export component FocusBorder inherits Rectangle {
 
 export component StateLayer inherits TouchArea {
     in property <length> border-radius <=> overlay.border-radius;
+    out property <bool> has-focus: focus-scope.has-focus;
     in-out property <bool> checked;
+
+    forward-focus: focus-scope;
+
+    focus-scope := FocusScope {
+        x: 0;
+        width: 0; // Do not react on clicks
+        enabled <=> root.enabled;
+
+        key-pressed(event) => {
+            if (event.text == " " || event.text == "\n") {
+                root.clicked();
+                 return accept;
+            }
+
+            return reject;
+        }
+    }
 
     @children
 
     overlay := Rectangle {}
+
+    if (root.has-focus) : Rectangle {
+        width: root.width + 6px;
+        height: root.height + 6px;
+        border-width: 1px;
+        border-radius: root.border-radius + 3px;
+        border-color: CosmicPalette.state-focus;
+    }
 
     states [
         pressed when root.pressed : {

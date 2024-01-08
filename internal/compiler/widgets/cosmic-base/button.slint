@@ -11,7 +11,7 @@ export component Button {
     in property <bool> enabled <=> state-layer.enabled;
     in property <bool> checkable;
     in property <bool> colorize-icon;
-    out property <bool> has-focus: focus-scope.has-focus;
+    out property <bool> has-focus: state-layer.has-focus;
     out property <bool> pressed: self.enabled && state-layer.pressed;
     in-out property <bool> checked <=> state-layer.checked;
 
@@ -25,7 +25,7 @@ export component Button {
     vertical-stretch: 0;
     accessible-label: text;
     accessible-role: button;
-    forward-focus: focus-scope;
+    forward-focus: state-layer;
 
     states [
         disabled when !root.enabled : {
@@ -76,25 +76,5 @@ export component Button {
             }
             root.clicked();
         }
-    }
-
-    focus-scope := FocusScope {
-        x: 0;
-        width: 0; // Do not react on clicks
-        enabled <=> root.enabled;
-
-        key-pressed(event) => {
-            if (event.text == " " || event.text == "\n") {
-                state-layer.clicked();
-                 return accept;
-            }
-
-            return reject;
-        }
-    }
-
-    // focus border
-    if (root.has-focus && root.enabled) : FocusBorder {
-        border-radius: background.border-radius;
     }
 }
