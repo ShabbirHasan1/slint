@@ -21,8 +21,11 @@ export component GroupBox {
 
         Rectangle {
             vertical-stretch: 1;
+            background: CosmicPalette.alternate-background;
+            border-radius: 8px;
 
             GridLayout {
+                padding: 8px;
                 @children
             }
         }
