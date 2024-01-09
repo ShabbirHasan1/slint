@@ -5,90 +5,81 @@ import { CosmicFontSettings, CosmicPalette } from "styling.slint";
 import { LineEditBase} from "../common/lineedit-base.slint";
 
 export component LineEdit {
-    in property <bool> enabled <=> i-base.enabled;
-    in property <InputType> input-type <=> i-base.input-type;
-    in property <TextHorizontalAlignment> horizontal-alignment <=> i-base.horizontal-alignment;
-    in property <bool> read-only <=> i-base.read-only;
-    in property <length> font-size <=> i-base.font-size;
-    in property <string> placeholder-text <=> i-base.placeholder-text;
-    out property <bool> has-focus <=> i-base.has-focus;
-    in-out property <string> text <=> i-base.text;
+    in property <bool> enabled <=> base.enabled;
+    in property <InputType> input-type <=> base.input-type;
+    in property <TextHorizontalAlignment> horizontal-alignment <=> base.horizontal-alignment;
+    in property <bool> read-only <=> base.read-only;
+    in property <length> font-size <=> base.font-size;
+    in property <string> placeholder-text <=> base.placeholder-text;
+    out property <bool> has-focus <=> base.has-focus;
+    in-out property <string> text <=> base.text;
 
-    callback accepted <=> i-base.accepted;
-    callback edited <=> i-base.edited;
+    callback accepted <=> base.accepted;
+    callback edited <=> base.edited;
 
     public function set-selection-offsets(start: int, end: int) {
-        i-base.set-selection-offsets(start, end);
+        base.set-selection-offsets(start, end);
     }
 
     public function select-all() {
-        i-base.select-all();
+        base.select-all();
     }
 
     public function clear-selection() {
-        i-base.clear-selection();
+        base.clear-selection();
     }
 
     public function cut() {
-        i-base.cut();
+        base.cut();
     }
 
     public function copy() {
-        i-base.copy();
+        base.copy();
     }
 
     public function paste() {
-        i-base.paste();
+        base.paste();
     }
 
     vertical-stretch: 0;
     horizontal-stretch: 1;
-    min-width: max(160px, i-layout.min-width);
-    min-height: max(32px, i-layout.min-height);
-    forward-focus: i-base;
+    min-width: max(160px, layout.min-width);
+    min-height: max(32px, layout.min-height);
+    forward-focus: base;
 
     states [
         disabled when !root.enabled : {
-            i-background.background: CosmicPalette.control-disabled;
-            i-background.border-color: CosmicPalette.border;
-            i-base.text-color: CosmicPalette.text-disabled;
-            i-base.selection-foreground-color: CosmicPalette.text-accent-foreground-disabled;
-            i-base.placeholder-color: CosmicPalette.text-disabled;
-        }
-        focused when root.has-focus : {
-            i-background.background: CosmicPalette.control-input-active;
-            i-background.border-color: CosmicPalette.border;
-            i-focus-border.background: CosmicPalette.accent-background;
-            i-base.placeholder-color: CosmicPalette.text-tertiary;
+            root.opacity: 0.5;
         }
     ]
 
-    i-background := Rectangle {
-        border-radius: 4px;
+    background := Rectangle {
+        border-radius: 8px;
         background: CosmicPalette.control-background;
         border-width: 1px;
-        border-color: CosmicPalette.text-control-border;
+        border-color: CosmicPalette.control-divider;
 
-        i-layout := HorizontalLayout {
-            padding-left: 12px;
-            padding-right: 12px;
+        layout := HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
 
-            i-base := LineEditBase {
+            base := LineEditBase {
                 font-size: CosmicFontSettings.body.font-size;
                 font-weight: CosmicFontSettings.body.font-weight;
                 selection-background-color: CosmicPalette.selection-background;
                 selection-foreground-color: CosmicPalette.accent-foreground;
                 text-color: CosmicPalette.foreground;
-                placeholder-color: CosmicPalette.text-secondary;
-                margin: i-layout.padding-left + i-layout.padding-right;
+                placeholder-color: CosmicPalette.placeholder-foreground;
+                margin: layout.padding-left + layout.padding-right;
             }
         }
 
-        i-focus-border := Rectangle {
-            x: parent.border-radius;
-            y: parent.height - self.height;
-            width: parent.width - 2 * parent.border-radius;
-            height: 2px;
+         if (root.has-focus) : Rectangle {
+            width: parent.width + 2px;
+            height: parent.height + 2px;
+            border-radius: parent.border-radius + 2px;
+            border-color: CosmicPalette.state-focus;
+            border-width: 1px;
         }
     }
 }
