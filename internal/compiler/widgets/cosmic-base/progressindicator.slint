@@ -7,7 +7,7 @@ export component ProgressIndicator {
     in property <float> progress;
     in property <bool> indeterminate;
 
-    min-height: 3px;
+    min-height: 4px;
     horizontal-stretch: 1;
     vertical-stretch: 0;
     accessible-role: none;
@@ -15,18 +15,15 @@ export component ProgressIndicator {
 
     Rectangle {
         clip: true;
+        border-radius: 2px;
+        background: CosmicPalette.neutral-6-background;
 
-        i-rail := Rectangle {
-            height: 1px;
-            background: CosmicPalette.border;
-            border-radius: 1px;
-        }
-
-        i-track := Rectangle {
+        track := Rectangle {
+            opacity: 0.75;
             width: !root.indeterminate ?  parent.width * min(1, max(0, root.progress)) : parent.width;
             height: 100%;
             x: !root.indeterminate ? 0px : -parent.width + (parent.width * mod(animation-tick(), 2s) / 1s);
-            border-radius: 3px;
+            border-radius: parent.border-radius;
             background: CosmicPalette.accent-background;
         }
     }
