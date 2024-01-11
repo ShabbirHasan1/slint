@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-1.1 OR LicenseRef-Slint-commercial
 
 import { CosmicPalette, CosmicFontSettings } from "styling.slint";
-import { FocusBorder } from "components.slint";
 
 export component TabWidgetImpl inherits Rectangle {
     in property <length> tabbar-preferred-height;
@@ -95,11 +94,6 @@ export component TabImpl inherits Rectangle {
         width: 100%;
         height: 1px;
         background: CosmicPalette.divider;
-    }
-
-    // focus border
-    if (root.has-focus && root.enabled) : FocusBorder {
-        border-radius: i-background.border-radius;
     }
 }
 

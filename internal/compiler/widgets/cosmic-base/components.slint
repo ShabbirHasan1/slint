@@ -3,38 +3,24 @@
 
 import { CosmicPalette, CosmicFontSettings } from "styling.slint";
 
-export component FocusBorder inherits Rectangle {
-    border-width: 2px;
-    border-color: CosmicPalette.focus-stroke-outer;
-
-    Rectangle {
-        x: parent.border-width;
-        y: parent.border-width;
-        width: parent.width - 2 * parent.border-width;
-        height: parent.height - 2 * parent.border-width;
-        border-width: 1px;
-        border-radius: parent.border-radius - 2px;
-        border-color: CosmicPalette.focus-stroke-inner;
-    }
-}
-
 export component StateLayerBase {
     in property <length> border-radius <=> overlay.border-radius;
     in property <bool> has-focus;
     in property <bool> pressed;
     in property <bool> has-hover;
     in property <bool> checked;
-    in property <bool> enabled;
+    in property <bool> enabled: true;
+    in property <length> focus-boder-margin: 3px;
 
     @children
 
     overlay := Rectangle {}
 
     if (root.has-focus && root.enabled) : Rectangle {
-        width: root.width + 6px;
-        height: root.height + 6px;
+        width: root.width + root.focus-boder-margin * 2;
+        height: root.height + root.focus-boder-margin * 2;
         border-width: 1px;
-        border-radius: root.border-radius + 3px;
+        border-radius: root.border-radius + root.focus-boder-margin;
         border-color: CosmicPalette.state-focus;
     }
 
@@ -129,6 +115,7 @@ export component ListItem {
         has-focus: root.has-focus;
         checked: root.is-selected;
         border-radius: 16px;
+        focus-boder-margin: 0;
     }
 
     layout := HorizontalLayout {
