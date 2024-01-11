@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-1.1 OR LicenseRef-Slint-commercial
 
 import { CosmicFontSettings, CosmicPalette } from "styling.slint";
-import { FocusBorder } from "components.slint";
+import { StateLayer } from "components.slint";
 
 export component Switch {
     in property <bool> enabled: true;
     in property <string> text;
     in-out property <bool> checked: true;
-    out property <bool> has-focus: i-focus-scope.has-focus;
+    out property <bool> has-focus: state-layer.has-focus;
 
     callback toggled;
 
@@ -23,79 +23,71 @@ export component Switch {
         root.toggled();
     }
 
-    min-width: 40px;
-    min-height: max(20px, i-layout.min-height);
+    min-width: 48px;
+    min-height: max(24px, layout.min-height);
     vertical-stretch: 0;
     horizontal-stretch: 0;
     accessible-label: root.text;
     accessible-checkable: true;
     accessible-checked <=> root.checked;
     accessible-role: checkbox;
-    forward-focus: i-focus-scope;
+    forward-focus: state-layer;
 
     states [
         disabled when !root.enabled : {
-            i-rail.background: root.checked ? CosmicPalette.accent-disabled : transparent;
-            i-rail.border-color: CosmicPalette.control-strong-stroke-disabled;
-            i-thumb.background: CosmicPalette.text-disabled;
-            root.text-color: CosmicPalette.text-disabled;
-            i-thumb.background: root.checked ? CosmicPalette.text-accent-foreground-disabled : CosmicPalette.text-secondary;
-        }
-        pressed when i-touch-area.pressed : {
-            i-rail.background: root.checked ? CosmicPalette.tertiary-accent-background : CosmicPalette.control-alt-quartiary;
-            i-thumb.width: 17px;
-            i-thumb.height: 14px;
-            i-thumb.border-width: root.checked ? 1px : 0;
-            i-thumb.background: root.checked ? CosmicPalette.accent-foreground : CosmicPalette.text-secondary;
-        }
-        hover when i-touch-area.has-hover : {
-            i-rail.background:  root.checked ? CosmicPalette.secondary-accent-background : CosmicPalette.control-alt-tertiary;
-            i-thumb.width: 14px;
-            i-thumb.border-width: root.checked ? 1px : 0;
-            i-thumb.background: root.checked ? CosmicPalette.accent-foreground : CosmicPalette.text-secondary;
-        }
-        selected when root.checked : {
-            i-rail.background: CosmicPalette.accent-background;
-            i-thumb.border-width: 1px;
-            i-thumb.border-color: CosmicPalette.circle-border;
-            i-thumb.background: CosmicPalette.accent-foreground;
+            opacity: 0.5;
         }
     ]
 
-    i-layout := HorizontalLayout {
+    touch-area := TouchArea {
+        enabled <=> root.enabled;
+
+        clicked => {
+            state-layer.clicked();
+        }
+    }
+
+    layout := HorizontalLayout {
         spacing: 12px;
 
         VerticalLayout {
             alignment: center;
 
-           Rectangle {
-                width: 40px;
-                height: 20px;
+          Rectangle {
+                width: 48px;
+                height: 24px;
 
-                i-rail := Rectangle {
-                    border-radius: 10px;
-                    border-width: root.checked ? 0 : 1px;
-                    border-color: CosmicPalette.control-strong-stroke;
-                    background: CosmicPalette.control-alt-secondary;
+                background := Rectangle {
+                    border-radius: 12px;
+                    background: CosmicPalette.neutral-5-background;
                 }
 
-                i-thumb := Rectangle {
-                    x: root.checked ? parent.width - self.width - 4px : 4px;
+                thumb := Rectangle {
+                    x: root.checked ? parent.width - self.width - 2px : 2px;
                     y: (parent.height - self.height) / 2;
-                    width: 12px;
+                    width: 20px;
                     height: self.width;
                     border-radius: self.height / 2;
-                    background: CosmicPalette.text-secondary;
-                    border-color: CosmicPalette.circle-border;
-
-                    animate background, width { duration: 150ms; easing: linear; }
+                    background: CosmicPalette.accent-foreground;
                 }
 
-                // focus border
-                if (root.has-focus && root.enabled) : FocusBorder {
-                    border-radius: i-rail.border-radius;
+                state-layer := StateLayer {
+                    border-radius: background.border-radius;
+
+                    clicked => {
+                        if (root.enabled) {
+                            root.checked = !root.checked;
+                            root.toggled();
+                        }
+                    }
                 }
             }
+
+            states [
+                selected when root.checked : {
+                    background.background: CosmicPalette.accent-background;
+                }
+            ]
         }
 
         if (root.text != "") : Text {
@@ -105,28 +97,6 @@ export component Switch {
             font-weight: CosmicFontSettings.body.font-weight;
             vertical-alignment: center;
             horizontal-alignment: left;
-        }
-    }
-
-    i-touch-area := TouchArea {
-        enabled <=> root.enabled;
-
-        clicked => {
-            root.toggle-checked();
-        }
-    }
-
-    i-focus-scope := FocusScope {
-        x:0;
-        width: 0px; // Do not react on clicks
-        enabled <=> root.enabled;
-
-        key-pressed(event) => {
-            if (event.text == " " || event.text == "\n") {
-                 root.toggle-checked();
-                 return accept;
-            }
-            return reject;
         }
     }
 }
