@@ -24,12 +24,13 @@ export component StateLayerBase {
     in property <bool> pressed;
     in property <bool> has-hover;
     in property <bool> checked;
+    in property <bool> enabled;
 
     @children
 
     overlay := Rectangle {}
 
-    if (root.has-focus) : Rectangle {
+    if (root.has-focus && root.enabled) : Rectangle {
         width: root.width + 6px;
         height: root.height + 6px;
         border-width: 1px;
@@ -79,6 +80,7 @@ export component StateLayer inherits TouchArea {
         pressed: root.pressed;
         has-hover: root.has-hover;
         checked: root.checked;
+        enabled: root.enabled;
 
         @children
    }
