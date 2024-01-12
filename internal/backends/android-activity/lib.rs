@@ -44,6 +44,7 @@ impl AndroidPlatform {
     /// }
     /// ```
     pub fn new(app: AndroidApp) -> Self {
+        let slint_java_helper = SlintJavaHelper::new(&app).unwrap();
         Self {
             app: app.clone(),
             window: Rc::<AndroidWindowAdapter>::new_cyclic(|w| AndroidWindowAdapter {
@@ -52,6 +53,7 @@ impl AndroidPlatform {
                 renderer: i_slint_renderer_skia::SkiaRenderer::default(),
                 event_queue: Default::default(),
                 pending_redraw: Default::default(),
+                slint_java_helper,
             }),
             event_listener: None,
         }
@@ -166,6 +168,7 @@ struct AndroidWindowAdapter {
     renderer: i_slint_renderer_skia::SkiaRenderer,
     event_queue: EventQueue,
     pending_redraw: Cell<bool>,
+    slint_java_helper: SlintJavaHelper,
 }
 
 impl WindowAdapter for AndroidWindowAdapter {
@@ -201,7 +204,7 @@ impl i_slint_core::window::WindowAdapterInternal for AndroidWindowAdapter {
                 #[cfg(not(feature = "native-activity"))]
                 self.app.show_soft_input(true);
                 #[cfg(feature = "native-activity")]
-                show_or_hide_soft_input(&self.app, true).unwrap();
+                show_or_hide_soft_input(&self.slint_java_helper, &self.app, true).unwrap();
                 props
             }
             i_slint_core::window::InputMethodRequest::Update(props) => props,
@@ -209,7 +212,7 @@ impl i_slint_core::window::WindowAdapterInternal for AndroidWindowAdapter {
                 #[cfg(not(feature = "native-activity"))]
                 self.app.hide_soft_input(true);
                 #[cfg(feature = "native-activity")]
-                show_or_hide_soft_input(&self.app, false).unwrap();
+                show_or_hide_soft_input(&self.slint_java_helper, &self.app, false).unwrap();
                 return;
             }
             _ => return,
@@ -724,64 +727,58 @@ fn map_key_code(code: android_activity::input::Keycode) -> Option<SharedString> 
     }
 }
 
+struct SlintJavaHelper(#[cfg(feature = "native-activity")] jni::objects::GlobalRef);
+
+impl SlintJavaHelper {
+    fn new(_app: &AndroidApp) -> Result<Self, jni::errors::Error> {
+        Ok(Self(
+            #[cfg(feature = "native-activity")]
+            load_java_helper(_app)?,
+        ))
+    }
+}
+
 #[cfg(feature = "native-activity")]
 /// Unfortunately, the way that the android-activity crate uses to show or hide the virtual keyboard doesn't
 /// work with native-activity. So do it manually with JNI
-fn show_or_hide_soft_input(app: &AndroidApp, show: bool) -> Result<(), jni::errors::Error> {
-    hello_world(app)?;
-
+fn show_or_hide_soft_input(
+    helper: &SlintJavaHelper,
+    app: &AndroidApp,
+    show: bool,
+) -> Result<(), jni::errors::Error> {
     use jni::objects::{JObject, JValue};
 
     // Safety: as documented in android-activity to obtain a jni::JavaVM
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) }?;
-    let mut env = vm.attach_current_thread()?;
-
-    // https://stackoverflow.com/questions/5864790/how-to-show-the-soft-keyboard-on-native-activity
-
     let native_activity = unsafe { JObject::from_raw(app.activity_as_ptr() as *mut _) };
 
-    let class_context = env.find_class("android/content/Context")?;
-    let input_method_service =
-        env.get_static_field(class_context, "INPUT_METHOD_SERVICE", "Ljava/lang/String;")?.l()?;
+    let mut env = vm.attach_current_thread()?;
 
-    let input_method_manager = env
-        .call_method(
-            &native_activity,
-            "getSystemService",
-            "(Ljava/lang/String;)Ljava/lang/Object;",
-            &[JValue::Object(&input_method_service)],
-        )?
-        .l()?;
-
-    let window =
-        env.call_method(native_activity, "getWindow", "()Landroid/view/Window;", &[])?.l()?;
-    let decor_view = env.call_method(window, "getDecorView", "()Landroid/view/View;", &[])?.l()?;
-
+    let helper_class: &jni::objects::JClass = helper.0.as_obj().into();
     if show {
-        env.call_method(
-            input_method_manager,
-            "showSoftInput",
-            "(Landroid/view/View;I)Z",
-            &[JValue::Object(&decor_view), 0.into()],
+        env.call_static_method(
+            helper_class,
+            "show_keyboard",
+            "(Landroid/app/Activity;)V",
+            &[JValue::Object(&native_activity)],
         )?;
     } else {
-        let binder =
-            env.call_method(decor_view, "getWindowToken", "()Landroid/os/IBinder;", &[])?.l()?;
-        env.call_method(
-            input_method_manager,
-            "hideSoftInputFromWindow",
-            "(Landroid/os/IBinder;I)Z",
-            &[JValue::Object(&binder), 0.into()],
+        env.call_static_method(
+            helper_class,
+            "hide_keyboard",
+            "(Landroid/app/Activity;)V",
+            &[JValue::Object(&native_activity)],
         )?;
     };
-
     Ok(())
 }
 
-fn hello_world(app: &AndroidApp) -> Result<(), jni::errors::Error> {
+#[cfg(feature = "native-activity")]
+fn load_java_helper(app: &AndroidApp) -> Result<jni::objects::GlobalRef, jni::errors::Error> {
     use jni::objects::{JObject, JValue};
     // Safety: as documented in android-activity to obtain a jni::JavaVM
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) }?;
+
     let mut env = vm.attach_current_thread()?;
 
     let dex_data = include_bytes!(concat!(env!("OUT_DIR"), "/classes.dex"));
@@ -796,8 +793,8 @@ fn hello_world(app: &AndroidApp) -> Result<(), jni::errors::Error> {
         &[JValue::Object(&dex_buffer), JValue::Object(&JObject::null())],
     )?;
 
-    let class_name = env.new_string("HelloWorld").unwrap();
-    let hello_world_class = env
+    let class_name = env.new_string("SlintAndroidJavaHelper").unwrap();
+    let helper_class = env
         .call_method(
             dex_loader,
             "findClass",
@@ -805,120 +802,6 @@ fn hello_world(app: &AndroidApp) -> Result<(), jni::errors::Error> {
             &[JValue::Object(&class_name)],
         )?
         .l()?;
-    let hello_world_class: jni::objects::JClass = hello_world_class.try_into().unwrap();
 
-    let name = env.new_string("John").unwrap();
-    env.call_static_method(
-        &hello_world_class,
-        "hello",
-        "(Ljava/lang/String;)V",
-        &[JValue::Object(&name)],
-    )
-    .unwrap();
-    Ok(())
+    Ok(env.new_global_ref(&helper_class)?)
 }
-
-// Call the loadDex method on the InMemoryDexClassLoader instance
-/*let load_dex_method =
-    env.get_method_id(dex_loader.as_obj(), "loadDex", "(Ljava/lang/String;)Ljava/lang/Class;")?;
-let _class = env.call_object_method(
-    dex_loader.as_obj(),
-    load_dex_method,
-    &[JString::from("HelloWorld").into()],
-)?;*/
-
-// Define the class from the .dex file
-/*let class_loader_class = env.find_class("dalvik/system/DexFile")?;
-    let define_class_method = env.get_method_id(
-        class_loader_class,
-        "defineClass",
-        "(Ljava/lang/String;[BII)Ljava/lang/Class;",
-    )?;
-    let class_loader = env
-        .call_static_method(
-            class_loader_class,
-            "defineClass",
-            "(Ljava/lang/String;[BII)Ljava/lang/Class;",
-            &[
-                dex_array.into(),
-                JClass::null().into(),
-                JInt::from(-1).into(),
-                JInt::from(-1).into(),
-            ],
-        )?
-        .l()?;
-
-    // Call the desired method on the class
-    let method_id = env.get_method_id(class_loader.as_obj(), "helloWorld", "()V")?;
-    env.call_void_method(class_loader.as_obj(), method_id, &[])?;
-*/
-// Ok(())
-
-/*let class_data = include_bytes!(env!("SLINT_JAVA_CLASS_PATH"));
-let class_name = "HelloWorld";
-
-let hello_world_class = env.define_class(class_name, &JObject::null(), &class_data)?;
-
-// Find the class
-//let hello_world_class = env.find_class(class_name)?;
-
-// Get the method ID of the 'hello' method
-//let hello_method_id = env.get_method_id(hello_world_class, "hello", "(Ljava/lang/String;)V")?;
-
-// Call the 'hello' method on an instance of the 'HelloWorld' class
-let name = env.new_string("John")?;
-env.call_method(hello_world_class, "hello", "(Ljava/lang/String;)V", &[JValue::Object(&name)])?;
-
-Ok(())
-*/
-
-/*
-    // Load the .dex file
-    /*
-    let dex_bytes = include_bytes!(env!("DEX_PATH"));
-    let dex_array: jbyteArray = env.new_byte_array(dex_bytes.len()).unwrap();
-    env.set_byte_array_region(dex_array, 0, dex_bytes).unwrap();
-
-    // Load the HelloWorld class
-    let class_name = "HelloWorld";
-    let class_signature = format!("L{};", class_name);
-    let hello_world_class = env.find_class(class_name).unwrap();
-
-    // Call the hello function
-    let hello_method_id = env.get_method_id(hello_world_class, "hello", "()V").unwrap();
-    let _result = env.call_method(None, hello_world_class, hello_method_id, &[]);*/
-
-    // Load the .class file
-    let class_data = include_bytes!(env!("SLINT_JAVA_CLASS_PATH"));
-    let class_data_array = env.byte_array_from_slice(class_data).unwrap();
-
-    // Create a new class loader
-    let class_loader_class = env.find_class("java/lang/ClassLoader").unwrap();
-    let class_loader = env
-        .call_static_method(
-            class_loader_class,
-            "getSystemClassLoader",
-            "()Ljava/lang/ClassLoader;",
-            &[],
-        )
-        .unwrap()
-        .l()
-        .unwrap();
-
-    let class_name = env.new_string("HelloWorld").unwrap();
-    let hello_world_class = env
-        .call_method(
-            class_loader,
-            "defineClass",
-            "(Ljava/lang/String;[BLjava/security/ProtectionDomain;)Ljava/lang/Class;",
-            &[JValue::Object(&class_name), JValue::Object(&class_data_array), 0.into()],
-        )
-        .unwrap()
-        .l()
-        .unwrap();
-
-    // Call the hello function
-    let name = env.new_string("John").unwrap();
-    env.call_method(hello_world_class, "hello", "(Ljava/lang/String;)V", &[JValue::Object(&name)])
-        .unwrap();
-*/

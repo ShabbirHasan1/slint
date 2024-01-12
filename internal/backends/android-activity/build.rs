@@ -10,11 +10,12 @@ fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
 
     let slint_path = "dev/slint/android-activity";
+    let java_class = "SlintAndroidJavaHelper";
 
     let out_class = format!("{out_dir}/java/{slint_path}");
 
     let android_home =
-        PathBuf::from(env::var("ANDROID_HOME").or_else(|_| env::var("ANDROID_SDK_ROOT")).expect(
+        PathBuf::from(env_var("ANDROID_HOME").or_else(|_| env_var("ANDROID_SDK_ROOT")).expect(
             "Please set the ANDROID_HOME environment variable to the path of the Android SDK",
         ));
 
@@ -22,7 +23,7 @@ fn main() {
         .expect("No Android platforms found");
 
     // Try to locate javac
-    let javac_path = match env::var("JAVA_HOME") {
+    let javac_path = match env_var("JAVA_HOME") {
         Ok(val) => {
             if cfg!(windows) {
                 format!("{}\\bin\\javac.exe", val)
@@ -35,7 +36,7 @@ fn main() {
 
     // Compile the Java file into a .class file
     let o = Command::new(&javac_path)
-        .arg(format!("java/HelloWorld.java"))
+        .arg(format!("java/{java_class}.java"))
         .arg("-d")
         .arg(&out_class)
         .arg("-classpath").arg(&classpath)
@@ -62,7 +63,7 @@ fn main() {
     .expect("d8 tool not found");
     let o = Command::new(&d8_path)
         .args(&["--classpath", &out_class])
-        .arg(format!("{out_class}/HelloWorld.class"))
+        .arg(format!("{out_class}/{java_class}.class"))
         .arg("--output")
         .arg(&out_dir)
         .output()
@@ -72,8 +73,12 @@ fn main() {
         panic!("Dex conversion failed: {}", String::from_utf8_lossy(&o.stderr));
     }
 
-    // Tell Cargo to re-run this build script if the Java file changes
-    println!("cargo:rerun-if-changed=java/HelloWorld.java");
+    println!("cargo:rerun-if-changed=java/{java_class}.java");
+}
+
+fn env_var(var: &str) -> Result<String, env::VarError> {
+    println!("cargo:rerun-if-env-changed={}", var);
+    env::var(var)
 }
 
 fn find_latest_version(base: PathBuf, arg: &str) -> Option<PathBuf> {
