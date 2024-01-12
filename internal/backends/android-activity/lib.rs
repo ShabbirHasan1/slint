@@ -746,29 +746,14 @@ fn show_or_hide_soft_input(
     app: &AndroidApp,
     show: bool,
 ) -> Result<(), jni::errors::Error> {
-    use jni::objects::{JObject, JValue};
-
     // Safety: as documented in android-activity to obtain a jni::JavaVM
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) }?;
-    let native_activity = unsafe { JObject::from_raw(app.activity_as_ptr() as *mut _) };
-
     let mut env = vm.attach_current_thread()?;
-
-    let helper_class: &jni::objects::JClass = helper.0.as_obj().into();
+    let helper = helper.0.as_obj();
     if show {
-        env.call_static_method(
-            helper_class,
-            "show_keyboard",
-            "(Landroid/app/Activity;)V",
-            &[JValue::Object(&native_activity)],
-        )?;
+        env.call_method(helper, "show_keyboard", "()V", &[])?;
     } else {
-        env.call_static_method(
-            helper_class,
-            "hide_keyboard",
-            "(Landroid/app/Activity;)V",
-            &[JValue::Object(&native_activity)],
-        )?;
+        env.call_method(helper, "hide_keyboard", "()V", &[])?;
     };
     Ok(())
 }
@@ -778,6 +763,7 @@ fn load_java_helper(app: &AndroidApp) -> Result<jni::objects::GlobalRef, jni::er
     use jni::objects::{JObject, JValue};
     // Safety: as documented in android-activity to obtain a jni::JavaVM
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) }?;
+    let native_activity = unsafe { JObject::from_raw(app.activity_as_ptr() as *mut _) };
 
     let mut env = vm.attach_current_thread()?;
 
@@ -803,5 +789,11 @@ fn load_java_helper(app: &AndroidApp) -> Result<jni::objects::GlobalRef, jni::er
         )?
         .l()?;
 
-    Ok(env.new_global_ref(&helper_class)?)
+    let helper_class: jni::objects::JClass = helper_class.into();
+    let helper_instance = env.new_object(
+        helper_class,
+        "(Landroid/app/Activity;)V",
+        &[JValue::Object(&native_activity)],
+    )?;
+    Ok(env.new_global_ref(&helper_instance)?)
 }

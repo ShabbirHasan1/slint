@@ -4,15 +4,18 @@ import android.view.inputmethod.InputMethodManager;
 import android.app.Activity;
 
 public class SlintAndroidJavaHelper  {
+    Activity mActivity;
 
-    public static void show_keyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(activity.getWindow().getDecorView(), 0);
+    public SlintAndroidJavaHelper(Activity activity) {
+        this.mActivity = activity;
     }
-
-    public static void hide_keyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
+    public void show_keyboard() {
+        InputMethodManager imm = (InputMethodManager)mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(mActivity.getWindow().getDecorView(), 0);
+    }
+    public void hide_keyboard() {
+        InputMethodManager imm = (InputMethodManager)mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mActivity.getWindow().getDecorView().getWindowToken(), 0);
     }
 
 }
